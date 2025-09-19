@@ -40,3 +40,86 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Validate built artifacts
+  validate-artifacts:
+    name: Validate Release Artifacts
+    runs-on: ubuntu-latest
+    needs: goreleaser
+    if: always() && needs.goreleaser.result == 'success'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      
+      - name: Get release info
+        id: release_info
+        run: |
+          # Extract tag from GITHUB_REF
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Working with tag: $TAG"
+      
+      - name: Download and validate artifacts
+        run: |
+          TAG="${{ steps.release_info.outputs.tag }}"
+          echo "Validating artifacts for release $TAG"
+          
+          # Create temp directory for downloads
+          mkdir -p /tmp/artifacts
+          cd /tmp/artifacts
+          
+          # Download key artifacts to validate
+          echo "Downloading Linux amd64 zip..."
+          curl -L -o "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          
+          echo "Downloading Windows amd64 zip..."
+          curl -L -o "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          
+          echo "Downloading checksums..."
+          curl -L -o "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+          
+          # Validate file types
+          echo "\n=== Validating file types ==="
+          echo "Linux zip:"
+          file "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          
+          echo "Windows zip:"
+          file "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          
+          # Test extraction
+          echo "\n=== Testing archive extraction ==="
+          echo "Testing Linux zip extraction:"
+          unzip -l "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" | head -10
+          
+          echo "Testing Windows zip extraction:"
+          unzip -l "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" | head -10
+          
+          # Validate checksums exist
+          echo "\n=== Validating checksums ==="
+          if [ -f "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" ]; then
+            echo "Checksums file found, checking format:"
+            head -5 "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+            
+            # Count number of checksums
+            CHECKSUM_COUNT=$(wc -l < "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS")
+            echo "Found $CHECKSUM_COUNT checksums"
+            
+            if [ "$CHECKSUM_COUNT" -lt 5 ]; then
+              echo "ERROR: Expected more checksums, only found $CHECKSUM_COUNT"
+              exit 1
+            fi
+          else
+            echo "ERROR: Checksums file not found"
+            exit 1
+          fi
+          
+          # Verify one checksum
+          echo "\n=== Verifying checksum ==="
+          sha256sum "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          grep "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+          
+          echo "\n=== Validation completed successfully! ==="
