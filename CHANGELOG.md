@@ -1,5 +1,11 @@
 # changelog
 
+## 0.14.7 (September 25, 2025)
+
+BUG FIXES:
+
+- **ci_release**: fixed an issue where the release process did not correctly build artefact and used tar.gz instead of zip.
+
 ## 0.14.6 (June 14, 2025)
 
 BUG FIXES:
@@ -10,7 +16,7 @@ BUG FIXES:
 ENHANCEMENTS:
 
 - **provider**: improved logging for API request failures to aid debugging.
-- **docs**: updated documentation for session sharing options and credential propagation.
+- **docs**: updated documentation for session sharing options and credenal propagation.
 
 ## 0.14.5 (August 25, 2025)
 
