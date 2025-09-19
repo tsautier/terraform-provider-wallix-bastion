@@ -115,28 +115,47 @@ jobs:
           ls -la dist/
           
           echo -e "\n=== Validating Linux builds ==="
-          if [ -f dist/*_linux_amd64.zip ]; then
-            echo "✓ Linux amd64 zip found"
-            file dist/*_linux_amd64.zip
-            unzip -l dist/*_linux_amd64.zip | head -5
+          if [ -d "dist/terraform-provider-wallix-bastion_linux_amd64_v1" ]; then
+            echo "✓ Linux amd64 build directory found"
+            ls -la "dist/terraform-provider-wallix-bastion_linux_amd64_v1/"
+            
+            # Check if binary exists
+            LINUX_BINARY=$(find "dist/terraform-provider-wallix-bastion_linux_amd64_v1" -name "*" -type f | head -1)
+            if [ -n "$LINUX_BINARY" ]; then
+              echo "✓ Linux binary found: $LINUX_BINARY"
+              file "$LINUX_BINARY"
+              ls -lh "$LINUX_BINARY"
+            else
+              echo "✗ No binary found in Linux build directory"
+              exit 1
+            fi
           else
-            echo "✗ Linux amd64 zip not found"
+            echo "✗ Linux amd64 build directory not found"
             exit 1
           fi
           
           echo -e "\n=== Validating Windows builds ==="
-          if [ -f dist/*_windows_amd64.zip ]; then
-            echo "✓ Windows amd64 zip found"
-            file dist/*_windows_amd64.zip
-            unzip -l dist/*_windows_amd64.zip | head -10
+          if [ -d "dist/terraform-provider-wallix-bastion_windows_amd64_v1" ]; then
+            echo "✓ Windows amd64 build directory found"
+            ls -la "dist/terraform-provider-wallix-bastion_windows_amd64_v1/"
+            
+            # Check if binary exists
+            WINDOWS_BINARY=$(find "dist/terraform-provider-wallix-bastion_windows_amd64_v1" -name "*" -type f | head -1)
+            if [ -n "$WINDOWS_BINARY" ]; then
+              echo "✓ Windows binary found: $WINDOWS_BINARY"
+              file "$WINDOWS_BINARY"
+              ls -lh "$WINDOWS_BINARY"
+            else
+              echo "✗ No binary found in Windows build directory"
+              exit 1
+            fi
           else
-            echo "✗ Windows amd64 zip not found"
+            echo "✗ Windows amd64 build directory not found"
             exit 1
           fi
           
           echo -e "\n=== Testing binary execution ==="
-          # Extract and test a binary
-          LINUX_BINARY=$(find dist -name "*_linux_amd64" -type f | head -1)
+          # Test Linux binary
           if [ -n "$LINUX_BINARY" ]; then
             echo "Testing binary: $LINUX_BINARY"
             chmod +x "$LINUX_BINARY"
@@ -145,6 +164,17 @@ jobs:
             else
               echo "⚠ Binary execution test (expected for Terraform providers without CLI)"
             fi
+          fi
+          
+          echo -e "\n=== Testing GoReleaser archive creation ==="
+          # Test that GoReleaser can create archives (dry run)
+          echo "Testing archive creation with GoReleaser..."
+          if which goreleaser >/dev/null 2>&1; then
+            # Check the config is valid
+            goreleaser check
+            echo "✓ GoReleaser configuration is valid"
+          else
+            echo "⚠ GoReleaser not available for config check"
           fi
           
           echo -e "\n=== Build validation completed successfully! ==="

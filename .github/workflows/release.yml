@@ -69,21 +69,57 @@ jobs:
           mkdir -p /tmp/artifacts
           cd /tmp/artifacts
           
-          # Download key artifacts to validate
-          echo "Downloading Linux amd64 zip..."
-          curl -L -o "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" \
-            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          # Wait for release to be fully available
+          echo "Waiting for release artifacts to be available..."
+          sleep 30
           
-          echo "Downloading Windows amd64 zip..."
-          curl -L -o "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" \
-            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          # Function to download with retries
+          download_with_retry() {
+            local url="$1"
+            local filename="$2"
+            local max_attempts=5
+            local attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt/$max_attempts: Downloading $filename..."
+              if curl -L -f -o "$filename" "$url"; then
+                # Check if we got an actual file, not an error page
+                if file "$filename" | grep -q "ASCII text"; then
+                  echo "Got HTML error page, retrying..."
+                  rm -f "$filename"
+                  sleep 10
+                  attempt=$((attempt + 1))
+                else
+                  echo "Successfully downloaded $filename"
+                  return 0
+                fi
+              else
+                echo "Download failed, retrying..."
+                sleep 10
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            echo "Failed to download $filename after $max_attempts attempts"
+            return 1
+          }
           
-          echo "Downloading checksums..."
-          curl -L -o "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" \
-            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+          # Download key artifacts to validate with retries
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" \
+            "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" \
+            "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" \
+            "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
           
           # Validate file types
-          echo "\n=== Validating file types ==="
+          echo ""
+          echo "=== Validating file types ==="
           echo "Linux zip:"
           file "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
           
@@ -91,15 +127,27 @@ jobs:
           file "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
           
           # Test extraction
-          echo "\n=== Testing archive extraction ==="
+          echo ""
+          echo "=== Testing archive extraction ==="
           echo "Testing Linux zip extraction:"
-          unzip -l "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" | head -10
+          if unzip -l "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" | head -10; then
+            echo "✓ Linux zip extraction successful"
+          else
+            echo "✗ Linux zip extraction failed"
+            exit 1
+          fi
           
           echo "Testing Windows zip extraction:"
-          unzip -l "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" | head -10
+          if unzip -l "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" | head -10; then
+            echo "✓ Windows zip extraction successful"
+          else
+            echo "✗ Windows zip extraction failed"
+            exit 1
+          fi
           
           # Validate checksums exist
-          echo "\n=== Validating checksums ==="
+          echo ""
+          echo "=== Validating checksums ==="
           if [ -f "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" ]; then
             echo "Checksums file found, checking format:"
             head -5 "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
@@ -118,8 +166,10 @@ jobs:
           fi
           
           # Verify one checksum
-          echo "\n=== Verifying checksum ==="
+          echo ""
+          echo "=== Verifying checksum ==="
           sha256sum "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
           grep "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
           
-          echo "\n=== Validation completed successfully! ==="
+          echo ""
+          echo "=== Validation completed successfully! ==="
