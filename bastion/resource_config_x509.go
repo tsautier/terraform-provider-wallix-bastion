@@ -17,7 +17,7 @@ type jsonConfigX509 struct {
 	CaCertificate    string `json:"ca_certificate,omitempty"`
 	ServerPublicKey  string `json:"server_public_key"`
 	ServerPrivateKey string `json:"server_private_key"`
-	Enable           bool   `json:"enable,omitempty"`
+	Enable           bool   `json:"enable"`
 	Default          bool   `json:"default,omitempty"`
 }
 
@@ -209,8 +209,10 @@ func prepareConfigX509JSON(d *schema.ResourceData) jsonConfigX509 {
 
 //nolint:wrapcheck
 func fillConfigX509(d *schema.ResourceData, jsonData jsonConfigX509) error {
-	if err := d.Set("enable", jsonData.Enable); err != nil {
-		return err
+	if _, enableSet := d.GetOk("enable"); enableSet || jsonData.Enable {
+		if err := d.Set("enable", jsonData.Enable); err != nil {
+			return err
+		}
 	}
 
 	return nil

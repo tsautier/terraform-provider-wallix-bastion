@@ -37,7 +37,7 @@ func TestAccResourceConfigX509_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "ca_certificate"),
 					resource.TestCheckResourceAttrSet(resourceName, "server_public_key"),
 					resource.TestCheckResourceAttrSet(resourceName, "server_private_key"),
-					resource.TestCheckResourceAttr(resourceName, "enable", "true"),
+					resource.TestCheckResourceAttr(resourceName, "enable", "false"),
 				),
 			},
 			// Test import
