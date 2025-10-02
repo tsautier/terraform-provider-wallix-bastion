@@ -8,9 +8,14 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+const (
+	sleepTimeAfterX509ConfigChange = 3 * time.Second
 )
 
 type jsonConfigX509 struct {
@@ -147,6 +152,10 @@ func addConfigX509(ctx context.Context, d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("API returned error: %d with body:\n%s", code, body)
 	}
 
+	// sleep after modifying the x509 configuration
+	// to wait for the API listener to restart with the new certificate
+	time.Sleep(sleepTimeAfterX509ConfigChange)
+
 	return nil
 }
 
@@ -182,6 +191,10 @@ func updateConfigX509(ctx context.Context, d *schema.ResourceData, m interface{}
 		return fmt.Errorf("API returned error: %d with body:\n%s", code, body)
 	}
 
+	// sleep after modifying the x509 configuration
+	// to wait for the API listener to restart with the new certificate
+	time.Sleep(sleepTimeAfterX509ConfigChange)
+
 	return nil
 }
 
@@ -194,6 +207,10 @@ func deleteConfigX509(ctx context.Context, m interface{}) error {
 	if code != http.StatusOK && code != http.StatusNoContent {
 		return fmt.Errorf("API returned error: %d with body:\n%s", code, body)
 	}
+
+	// sleep after modifying the x509 configuration
+	// to wait for the API listener to restart with the new certificate
+	time.Sleep(sleepTimeAfterX509ConfigChange)
 
 	return nil
 }
