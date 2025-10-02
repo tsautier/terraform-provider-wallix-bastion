@@ -2,9 +2,12 @@ package bastion
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -15,6 +18,7 @@ type jsonConfigX509 struct {
 	ServerPublicKey  string `json:"server_public_key"`
 	ServerPrivateKey string `json:"server_private_key"`
 	Enable           bool   `json:"enable,omitempty"`
+	Default          bool   `json:"default,omitempty"`
 }
 
 func resourceConfigX509() *schema.Resource {
@@ -64,11 +68,39 @@ func resourceConfigX509Read(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	// If no config exists, mark the resource as deleted
-	if cfg.ServerPublicKey == "" && cfg.ServerPrivateKey == "" {
+	// If default config, mark the resource as deleted
+	if cfg.Default {
 		d.SetId("")
 
 		return nil
+	}
+	if d.Get("ca_certificate").(string) != "" {
+		// check diff between api response and common name of ca_certificate
+		caCertificatePEM, _ := pem.Decode([]byte(d.Get("ca_certificate").(string)))
+		caCertificate, err := x509.ParseCertificate(caCertificatePEM.Bytes)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		// If ca_certificate common name not match, mark the resource as deleted
+		if !strings.Contains(cfg.CaCertificate, "/CN="+caCertificate.Subject.CommonName) {
+			d.SetId("")
+
+			return nil
+		}
+	}
+	if d.Get("server_public_key").(string) != "" {
+		// check diff between api response and common name of server_public_key
+		serverPublicKeyPEM, _ := pem.Decode([]byte(d.Get("server_public_key").(string)))
+		serverPublicKey, err := x509.ParseCertificate(serverPublicKeyPEM.Bytes)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		// If server_public_key common name not match, mark the resource as deleted
+		if !strings.Contains(cfg.ServerPublicKey, "/CN="+serverPublicKey.Subject.CommonName) {
+			d.SetId("")
+
+			return nil
+		}
 	}
 
 	if err := fillConfigX509(d, cfg); err != nil {
@@ -177,15 +209,6 @@ func prepareConfigX509JSON(d *schema.ResourceData) jsonConfigX509 {
 
 //nolint:wrapcheck
 func fillConfigX509(d *schema.ResourceData, jsonData jsonConfigX509) error {
-	if err := d.Set("ca_certificate", jsonData.CaCertificate); err != nil {
-		return err
-	}
-	if err := d.Set("server_public_key", jsonData.ServerPublicKey); err != nil {
-		return err
-	}
-	if err := d.Set("server_private_key", jsonData.ServerPrivateKey); err != nil {
-		return err
-	}
 	if err := d.Set("enable", jsonData.Enable); err != nil {
 		return err
 	}
