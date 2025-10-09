@@ -6,7 +6,7 @@ on:
     tags:
       - v*
 permissions:
-  contents: read
+  contents: write  # Changed from 'read' to 'write' for release creation
   packages: write
   issues: read
   pull-requests: read
@@ -16,24 +16,160 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Unshallow
-        run: git fetch --prune --unshallow
-      - name: Set up Go
-        uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          fetch-depth: 0  # Full history needed for changelog generation
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'  # Use Go version from go.mod instead of hardcoded
+          cache: true  # Enable Go module caching
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6.3.0
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+      
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6.4.0
         with:
-          version: latest
+          version: v2.12.0  # Lock to specific version instead of 'latest'
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Validate built artifacts
+  validate-artifacts:
+    name: Validate Release Artifacts
+    runs-on: ubuntu-latest
+    needs: goreleaser
+    if: always() && needs.goreleaser.result == 'success'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      
+      - name: Get release info
+        id: release_info
+        run: |
+          # Extract tag from GITHUB_REF
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Working with tag: $TAG"
+      
+      - name: Download and validate artifacts
+        run: |
+          TAG="${{ steps.release_info.outputs.tag }}"
+          echo "Validating artifacts for release $TAG"
+          
+          # Create temp directory for downloads
+          mkdir -p /tmp/artifacts
+          cd /tmp/artifacts
+          
+          # Wait for release to be fully available
+          echo "Waiting for release artifacts to be available..."
+          sleep 30
+          
+          # Function to download with retries
+          download_with_retry() {
+            local url="$1"
+            local filename="$2"
+            local max_attempts=5
+            local attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt/$max_attempts: Downloading $filename..."
+              if curl -L -f -o "$filename" "$url"; then
+                # Check if we got an actual file, not an error page
+                if file "$filename" | grep -q "ASCII text"; then
+                  echo "Got HTML error page, retrying..."
+                  rm -f "$filename"
+                  sleep 10
+                  attempt=$((attempt + 1))
+                else
+                  echo "Successfully downloaded $filename"
+                  return 0
+                fi
+              else
+                echo "Download failed, retrying..."
+                sleep 10
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            echo "Failed to download $filename after $max_attempts attempts"
+            return 1
+          }
+          
+          # Download key artifacts to validate with retries
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" \
+            "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" \
+            "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          
+          download_with_retry \
+            "https://github.com/wallix/terraform-provider-wallix-bastion/releases/download/${TAG}/terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" \
+            "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+          
+          # Validate file types
+          echo ""
+          echo "=== Validating file types ==="
+          echo "Linux zip:"
+          file "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          
+          echo "Windows zip:"
+          file "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip"
+          
+          # Test extraction
+          echo ""
+          echo "=== Testing archive extraction ==="
+          echo "Testing Linux zip extraction:"
+          if unzip -l "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" | head -10; then
+            echo "✓ Linux zip extraction successful"
+          else
+            echo "✗ Linux zip extraction failed"
+            exit 1
+          fi
+          
+          echo "Testing Windows zip extraction:"
+          if unzip -l "terraform-provider-wallix-bastion_${TAG}_windows_amd64.zip" | head -10; then
+            echo "✓ Windows zip extraction successful"
+          else
+            echo "✗ Windows zip extraction failed"
+            exit 1
+          fi
+          
+          # Validate checksums exist
+          echo ""
+          echo "=== Validating checksums ==="
+          if [ -f "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS" ]; then
+            echo "Checksums file found, checking format:"
+            head -5 "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+            
+            # Count number of checksums
+            CHECKSUM_COUNT=$(wc -l < "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS")
+            echo "Found $CHECKSUM_COUNT checksums"
+            
+            if [ "$CHECKSUM_COUNT" -lt 5 ]; then
+              echo "ERROR: Expected more checksums, only found $CHECKSUM_COUNT"
+              exit 1
+            fi
+          else
+            echo "ERROR: Checksums file not found"
+            exit 1
+          fi
+          
+          # Verify one checksum
+          echo ""
+          echo "=== Verifying checksum ==="
+          sha256sum "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip"
+          grep "terraform-provider-wallix-bastion_${TAG}_linux_amd64.zip" "terraform-provider-wallix-bastion_${TAG}_SHA256SUMS"
+          
+          echo ""
+          echo "=== Validation completed successfully! ==="
