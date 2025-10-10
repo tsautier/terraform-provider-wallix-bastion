@@ -1,6 +1,11 @@
-version: "2"
+# golangci-lint configuration for terraform-provider-wallix-bastion
+
+run:
+  timeout: 5m
+  tests: true
+
 linters:
-  default: all
+  enable-all: true
   disable:
     - cyclop
     - depguard
@@ -14,44 +19,39 @@ linters:
     - nestif
     - paralleltest
     - tagliatelle
+    - tenv  # deprecated since v1.64.0, replaced by usetesting
     - varnamelen
     - wsl
-  settings:
-    gocognit:
-      min-complexity: 30
-    gocyclo:
-      min-complexity: 30
-    govet:
-      disable:
-        - fieldalignment
-      enable-all: true
-  exclusions:
-    generated: lax
-    presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
-formatters:
-  enable:
-    - gci
-    - gofmt
-    - gofumpt
-    - goimports
-  settings:
-    gci:
-      sections:
-        - standard
-        - localModule
-        - default
-      custom-order: true
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+
+linters-settings:
+  gocognit:
+    min-complexity: 30
+  gocyclo:
+    min-complexity: 30
+  govet:
+    disable:
+      - fieldalignment
+    enable-all: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/wallix/terraform-provider-wallix-bastion)
+    custom-order: true
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+    # Exclude examples and third party code
+    - path: examples/
+      linters:
+        - all
+    - path: third_party/
+      linters:
+        - all

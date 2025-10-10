@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/wallix/terraform-provider-wallix-bastion/bastion"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"golang.org/x/mod/semver"
+
+	"github.com/wallix/terraform-provider-wallix-bastion/bastion"
 )
 
 func TestAccResourceApplication_basic(t *testing.T) {
