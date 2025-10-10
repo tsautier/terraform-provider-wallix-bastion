@@ -46,6 +46,9 @@ func (c *Client) newRequest(ctx context.Context, uri string, method string, json
 		url += "/" + uri
 	}
 	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("preparing http request: %w", err)
+	}
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Add("User-Agent", "terraform-provider-wallix-bastion")
 	if c.bastionToken != "" {
@@ -55,9 +58,6 @@ func (c *Client) newRequest(ctx context.Context, uri string, method string, json
 		rawcreds := c.bastionUser + ":" + c.bastionPwd
 		encodedcreds := base64.StdEncoding.EncodeToString([]byte(rawcreds))
 		req.Header.Add("Authorization", "Basic "+encodedcreds)
-	}
-	if err != nil {
-		return "", http.StatusInternalServerError, fmt.Errorf("preparing http request: %w", err)
 	}
 	resp, err := defaultHTTPClient.Do(req)
 	if err != nil {
