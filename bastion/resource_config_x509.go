@@ -232,7 +232,7 @@ func prepareConfigX509JSON(d *schema.ResourceData) jsonConfigX509 {
 
 //nolint:wrapcheck
 func fillConfigX509(d *schema.ResourceData, jsonData jsonConfigX509) error {
-	if _, enableSet := d.GetOk("enable"); enableSet || jsonData.Enable {
+	if _, enableExplicitlySet := d.GetOk("enable"); enableExplicitlySet || jsonData.Enable {
 		if err := d.Set("enable", jsonData.Enable); err != nil {
 			return err
 		}
