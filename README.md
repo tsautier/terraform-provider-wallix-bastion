@@ -1,6 +1,6 @@
 # Terraform Provider for Wallix Bastion
 
-![Wallix Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX_2024_black%2Borange.png)
+![Wallix Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX.png)
 
 A Terraform provider for managing Wallix Bastion resources
 
@@ -14,7 +14,7 @@ The Terraform Wallix Bastion provider allows you to manage Wallix Bastion resour
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
+- Visit the official [Terraform website](https://www.terraform.io/) for downloads
 - [Go](https://golang.org/doc/install) `v1.22` or `v1.23` (for development)
 
 ### From Terraform Registry
