@@ -1,7 +1,6 @@
 package bastion_test
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -40,7 +39,7 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("WALLIX_BASTION_USER must be set for acceptance tests")
 	}
 
-	if err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil)); err != nil {
+	if err := testAccProvider.Configure(t.Context(), terraform.NewResourceConfigRaw(nil)); err != nil {
 		t.Fatal(err)
 	}
 }
