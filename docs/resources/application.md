@@ -63,7 +63,6 @@ resource "wallix-bastion_application" "jumphost_app" {
 - `local_domains` (List of Object) (see [below for nested schema](#nestedatt--local_domains))
 
 <a id="nestedblock--paths"></a>
-
 ### Nested Schema for `paths`
 
 Required:
@@ -75,8 +74,8 @@ Optional:
 
 - `working_dir` (String)
 
-<a id="nestedatt--local_domains"></a>
 
+<a id="nestedatt--local_domains"></a>
 ### Nested Schema for `local_domains`
 
 Read-Only:

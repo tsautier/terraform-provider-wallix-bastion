@@ -269,6 +269,7 @@ make clean          # Clean build artifacts
 make setup-dev      # Setup development environment
 make install        # Install the provider locally
 make docs           # Generate documentation
+make docs-verify    # Verify documentation quality
 
 # Maintenance and release commands
 make maintenance    # Run maintenance tasks (deps, lint, test, build)
@@ -285,6 +286,7 @@ See [RELEASE.md](./RELEASE.md) for detailed release process documentation.
 ## Documentation
 
 - [Provider Documentation](https://registry.terraform.io/providers/wallix/wallix-bastion/latest/docs)
+- [Documentation Generation Guide](./DOCUMENTATION.md) - How to generate and verify documentation
 - [API Documentation](https://docs.wallix.com/)
 - [Examples](./examples/)
 

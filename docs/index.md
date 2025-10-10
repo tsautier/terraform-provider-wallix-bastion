@@ -112,6 +112,7 @@ export WALLIX_BASTION_API_VERSION="v3.12"
 ### Authentication Arguments
 
 Choose one authentication method:
+
 - **password**: Password for username/password authentication
 - **token**: API token for token-based authentication
 
@@ -212,5 +213,5 @@ The provider supports comprehensive Bastion resource management:
 
 ### Deprecated Features
 
-From version 0.14.0, support for API versions v3.3 and v3.6 has been removed. 
+From version 0.14.0, support for API versions v3.3 and v3.6 has been removed.
 If you need these versions, use provider version 0.13.0 and consider upgrading your Bastion.
