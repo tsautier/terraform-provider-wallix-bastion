@@ -82,6 +82,9 @@ func resourceConfigX509Read(ctx context.Context, d *schema.ResourceData, m inter
 	if d.Get("ca_certificate").(string) != "" {
 		// check diff between api response and common name of ca_certificate
 		caCertificatePEM, _ := pem.Decode([]byte(d.Get("ca_certificate").(string)))
+		if caCertificatePEM == nil {
+			return diag.FromErr(fmt.Errorf("failed to decode PEM block from ca_certificate"))
+		}
 		caCertificate, err := x509.ParseCertificate(caCertificatePEM.Bytes)
 		if err != nil {
 			return diag.FromErr(err)
@@ -96,6 +99,9 @@ func resourceConfigX509Read(ctx context.Context, d *schema.ResourceData, m inter
 	if d.Get("server_public_key").(string) != "" {
 		// check diff between api response and common name of server_public_key
 		serverPublicKeyPEM, _ := pem.Decode([]byte(d.Get("server_public_key").(string)))
+		if serverPublicKeyPEM == nil {
+			return diag.FromErr(fmt.Errorf("failed to decode PEM block from server_public_key"))
+		}
 		serverPublicKey, err := x509.ParseCertificate(serverPublicKeyPEM.Bytes)
 		if err != nil {
 			return diag.FromErr(err)
