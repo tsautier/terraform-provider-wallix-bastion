@@ -412,11 +412,11 @@ examples/
 
    ## Variables
 
+```text
    | Name | Description | Type | Required |
    |------|-------------|------|----------|
    | ... | ... | ... | ... |
-
-   ```
+```
 
 ### Example Best Practices
 
