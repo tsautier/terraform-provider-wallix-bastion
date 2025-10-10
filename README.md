@@ -269,7 +269,18 @@ make clean          # Clean build artifacts
 make setup-dev      # Setup development environment
 make install        # Install the provider locally
 make docs           # Generate documentation
+
+# Maintenance and release commands
+make maintenance    # Run maintenance tasks (deps, lint, test, build)
+make dev-check      # Quick development checks (lint, test, build)
+make update-deps    # Update Go dependencies only
+make prepare-release # Dry-run release preparation
+make release-patch  # Prepare patch release (X.Y.Z+1)
+make release-minor  # Prepare minor release (X.Y+1.0)
+make release-major  # Prepare major release (X+1.0.0)
 ```
+
+See [RELEASE.md](./RELEASE.md) for detailed release process documentation.
 
 ## Documentation
 

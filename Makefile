@@ -18,7 +18,7 @@ BINARY_NAME := terraform-provider-$(PROVIDER_NAME)
 # Use a -ldflags string for versioning during compilation
 LDFLAGS_STRING := "-X main.version=$(VERSION)"
 
-.PHONY: build install test testacc test-coverage fmt lint vet clean setup-dev docs build-all test-all
+.PHONY: build install test testacc test-coverage fmt lint vet clean setup-dev docs build-all test-all maintenance prepare-release release-patch release-minor release-major
 
 # Default target
 default: build
@@ -109,3 +109,28 @@ setup-coverage:
 	@mkdir -p tools/coverage-analyzer
 	@echo "Coverage analyzer directory created"
 	@echo "Please add the coverage analyzer code to tools/coverage-analyzer/main.go"
+
+# Maintenance tasks
+maintenance:
+	@./scripts/maintenance.sh
+
+# Release preparation scripts
+prepare-release:
+	@./scripts/prepare-release.sh --dry-run
+
+release-patch:
+	@./scripts/prepare-release.sh --patch
+
+release-minor:
+	@./scripts/prepare-release.sh --minor
+
+release-major:
+	@./scripts/prepare-release.sh --major
+
+# Quick development checks
+dev-check: lint test build
+	@echo "Development checks completed successfully"
+
+# Update dependencies
+update-deps:
+	@./scripts/maintenance.sh deps

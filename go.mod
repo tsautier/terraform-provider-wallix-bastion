@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/hashicorp/go-cleanhttp v0.5.2
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.35.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1
 	golang.org/x/mod v0.21.0
 )
 
