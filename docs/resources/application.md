@@ -62,7 +62,9 @@ resource "wallix-bastion_application" "jumphost_app" {
 - `id` (String) The ID of this resource.
 - `local_domains` (List of Object) (see [below for nested schema](#nestedatt--local_domains))
 
+<!-- markdownlint-disable-next-line MD033 -->
 <a id="nestedblock--paths"></a>
+
 ### Nested Schema for `paths`
 
 Required:
@@ -74,8 +76,9 @@ Optional:
 
 - `working_dir` (String)
 
-
+<!-- markdownlint-disable-next-line MD033 -->
 <a id="nestedatt--local_domains"></a>
+
 ### Nested Schema for `local_domains`
 
 Read-Only:

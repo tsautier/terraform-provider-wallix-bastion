@@ -156,7 +156,7 @@ Create a dedicated user account for Terraform:
 2. Assign appropriate profile (avoid admin if possible)
 3. Use this account for Terraform operations
 
-### Environment Variables
+### Secure Environment Variables
 
 Store sensitive information in environment variables:
 
