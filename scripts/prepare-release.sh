@@ -95,8 +95,12 @@ check_branch() {
 update_dependencies() {
     log_info "Updating Go dependencies..."
     
-    # Update all dependencies to their latest versions
-    go get -u all
+    # Update all dependencies to their latest versions, excluding golang.org/x/tools
+    # which has breaking changes in v0.38.0
+    mapfile -t deps < <(go list -m -f '{{if not .Indirect}}{{.Path}}{{end}}' all | grep -v golang.org/x/tools)
+    if [ ${#deps[@]} -gt 0 ]; then
+        go get -u "${deps[@]}"
+    fi
     go mod tidy
     
     # Verify dependencies
