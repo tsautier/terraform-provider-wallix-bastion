@@ -332,6 +332,100 @@ git commit -m "docs: add documentation for new resource"
 
 For detailed documentation guidelines, see [DOCUMENTATION.md](./DOCUMENTATION.md).
 
+## Working with Examples
+
+### Example Structure
+
+The `examples/` directory contains real-world usage scenarios:
+
+```text
+examples/
+├── README.md              # Examples overview
+├── basic/                 # Simple configurations
+├── complete-setup/        # Full enterprise setup
+├── approval-workflow/     # Approval process examples
+└── session-sharing/       # Session sharing configurations
+```
+
+### Adding New Examples
+
+1. **Create Example Directory**
+
+   ```bash
+   mkdir examples/your-example-name
+   cd examples/your-example-name
+   ```
+
+2. **Add Terraform Configuration**
+
+   ```hcl
+   # main.tf
+   terraform {
+     required_providers {
+       wallix-bastion = {
+         source  = "wallix/wallix-bastion"
+         version = "~> 0.14.0"
+       }
+     }
+   }
+
+   provider "wallix-bastion" {
+     ip    = var.bastion_host
+     user  = var.bastion_user
+     token = var.bastion_token
+   }
+
+   # Your resource configuration here
+   ```
+
+3. **Add Variables and Outputs**
+
+   ```hcl
+   # variables.tf
+   variable "bastion_host" {
+     description = "Wallix Bastion hostname"
+     type        = string
+   }
+
+   # outputs.tf
+   output "resource_id" {
+     description = "ID of the created resource"
+     value       = wallix-bastion_resource.example.id
+   }
+   ```
+
+4. **Add Documentation**
+
+   ```markdown
+   # README.md
+   # Example Name
+
+   This example demonstrates...
+
+   ## Usage
+
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+   ## Variables
+
+   | Name | Description | Type | Required |
+   |------|-------------|------|----------|
+   | ... | ... | ... | ... |
+
+   ```
+
+### Example Best Practices
+
+- Use meaningful variable names and descriptions
+- Include all necessary variables with sensible defaults
+- Add comprehensive README with usage instructions
+- Test examples before submitting
+- Use realistic configurations that users would actually deploy
+
 ## Release Process
 
 ### Version Management
@@ -372,6 +466,101 @@ For security-related issues, please follow our [Security Policy](SECURITY.md) ra
 - **GitHub Issues**: Bug reports and feature requests
 - **GitHub Discussions**: General questions and community discussions
 - **Pull Requests**: Code contributions and reviews
+
+## Troubleshooting Development Issues
+
+### Common Build Issues
+
+1. **Go Version Mismatch**
+
+   ```bash
+   # Check Go version
+   go version
+   
+   # Update if needed (requires Go 1.22 or 1.23)
+   ```
+
+2. **Dependency Issues**
+
+   ```bash
+   # Clean and reinstall dependencies
+   go mod tidy
+   go mod download
+   ```
+
+3. **Provider Installation Issues**
+
+   ```bash
+   # Clean and reinstall provider
+   make clean
+   make install
+   ```
+
+### Testing Issues
+
+1. **Acceptance Tests Failing**
+
+   ```bash
+   # Verify environment variables
+   echo $WALLIX_BASTION_HOST
+   echo $WALLIX_BASTION_USER
+   echo $TF_ACC
+   
+   # Check Bastion connectivity
+   curl -k https://$WALLIX_BASTION_HOST/api/version
+   ```
+
+2. **Test Cleanup Issues**
+
+   ```bash
+   # Manually clean test resources if needed
+   terraform destroy -target=wallix-bastion_resource.test
+   ```
+
+### Documentation Issues
+
+1. **tfplugindocs Not Found**
+
+   ```bash
+   # Install tfplugindocs
+   go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+   ```
+
+2. **Template Generation Errors**
+
+   ```bash
+   # Verify provider builds successfully
+   make build
+   
+   # Check for schema errors
+   terraform providers schema -json
+   ```
+
+### IDE Setup
+
+#### VS Code
+
+Recommended extensions:
+
+- Go extension
+- HashiCorp Terraform
+- markdownlint
+
+Settings:
+
+```json
+{
+  "go.formatTool": "goimports",
+  "go.lintTool": "golangci-lint",
+  "terraform.experimentalFeatures.validateOnSave": true
+}
+```
+
+#### GoLand/IntelliJ
+
+- Enable Go modules support
+- Configure code style for Go
+- Install Terraform plugin
 
 ## Maintenance
 
