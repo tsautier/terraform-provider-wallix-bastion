@@ -1,6 +1,6 @@
 # Terraform Provider for Wallix Bastion
 
-![Wallix Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX_2024_black%2Borange.png)
+![Wallix Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX.png)
 
 A Terraform provider for managing Wallix Bastion resources
 
@@ -14,7 +14,7 @@ The Terraform Wallix Bastion provider allows you to manage Wallix Bastion resour
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
+- Visit the official [Terraform website](https://www.terraform.io/) for downloads
 - [Go](https://golang.org/doc/install) `v1.22` or `v1.23` (for development)
 
 ### From Terraform Registry
@@ -213,6 +213,20 @@ cd examples/
 # Choose an example directory, e.g., authorization
 cd authorization
 
+# Update the provider to use the development build
+
+# terraform {
+#   required_version = ">= 1.0"
+#   required_providers {
+#     wallix-bastion = {
+#       # source  = "wallix/wallix-bastion"
+#       # version = "0.14.7"
+#       source  = "terraform.local/local/wallix-bastion"
+#       version = "0.0.0-dev"
+#     }
+#   }
+# }
+
 terraform init
 terraform plan
 terraform apply
@@ -255,11 +269,24 @@ make clean          # Clean build artifacts
 make setup-dev      # Setup development environment
 make install        # Install the provider locally
 make docs           # Generate documentation
+make docs-verify    # Verify documentation quality
+
+# Maintenance and release commands
+make maintenance    # Run maintenance tasks (deps, lint, test, build)
+make dev-check      # Quick development checks (lint, test, build)
+make update-deps    # Update Go dependencies only
+make prepare-release # Dry-run release preparation
+make release-patch  # Prepare patch release (X.Y.Z+1)
+make release-minor  # Prepare minor release (X.Y+1.0)
+make release-major  # Prepare major release (X+1.0.0)
 ```
+
+See [RELEASE.md](./RELEASE.md) for detailed release process documentation.
 
 ## Documentation
 
 - [Provider Documentation](https://registry.terraform.io/providers/wallix/wallix-bastion/latest/docs)
+- [Documentation Generation Guide](./DOCUMENTATION.md) - How to generate and verify documentation
 - [API Documentation](https://docs.wallix.com/)
 - [Examples](./examples/)
 

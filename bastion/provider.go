@@ -2,6 +2,7 @@ package bastion
 
 import (
 	"context"
+	"math"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -112,6 +113,16 @@ func configureProvider(
 		bastionToken:      d.Get("token").(string),
 		bastionUser:       d.Get("user").(string),
 		bastionPwd:        d.Get("password").(string),
+	}
+
+	if config.bastionIP == "" {
+		return nil, diag.Errorf("missing 'ip' configuration to configure provider")
+	}
+	if config.bastionUser == "" {
+		return nil, diag.Errorf("missing 'user' configuration to configure provider")
+	}
+	if config.bastionPort < 0 || config.bastionPort > math.MaxUint16 {
+		return nil, diag.Errorf("invalid value %d for 'port' configuration to configure provider", config.bastionPort)
 	}
 
 	return config.Client()

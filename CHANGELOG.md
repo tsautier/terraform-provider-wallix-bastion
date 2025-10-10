@@ -1,5 +1,22 @@
 # changelog
 
+## 0.14.8 (October 10, 2025)
+
+BUG FIXES:
+
+- **provider**: improved error handling and validation when configuring provider with missing or invalid values (ip, user, port) to provide clearer error messages instead of panics.
+- **provider**: fixed potential panic when making HTTP requests with bad client configuration by improving error handling order.
+- **resource/wallix-bastion_config_x509**: fixed infinite non-empty plan issue by avoiding to set the full API response in state and instead comparing certificate common names to detect changes.
+- **resource/wallix-bastion_config_x509**: fixed update of `enable` attribute from `true` to `false` and ensure it's properly set in state only when configured.
+- **resource/wallix-bastion_config_x509**: added 3-second delay after modifying X509 configuration to wait for API listener restart with new certificate.
+
+ENHANCEMENTS:
+
+- **resource/wallix-bastion_device_service**: added a format control on service_name to avoid API error when creating/updating a service with invalid characters.
+- **ci**: updated GitHub workflows with improved linting configuration and dependency updates.
+- **ci**: enhanced golangci-lint configuration with proper import ordering and deprecation handling.
+- **docs**: updated documentation workflow with better validation and formatting checks.
+
 ## 0.14.7 (September 25, 2025)
 
 BUG FIXES:
