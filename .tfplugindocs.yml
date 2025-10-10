@@ -1,0 +1,11 @@
+provider:
+  name: wallix-bastion
+
+template_paths:
+  - templates/
+
+rendered_provider_name: terraform-provider-wallix-bastion
+
+examples_dir: examples/
+
+website_temp_dir: /tmp/tfplugindocs
