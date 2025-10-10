@@ -213,6 +213,20 @@ cd examples/
 # Choose an example directory, e.g., authorization
 cd authorization
 
+# Update the provider to use the development build
+
+# terraform {
+#   required_version = ">= 1.0"
+#   required_providers {
+#     wallix-bastion = {
+#       # source  = "wallix/wallix-bastion"
+#       # version = "0.14.7"
+#       source  = "terraform.local/local/wallix-bastion"
+#       version = "0.0.0-dev"
+#     }
+#   }
+# }
+
 terraform init
 terraform plan
 terraform apply
