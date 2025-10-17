@@ -1,8 +1,8 @@
-# Terraform Provider for Wallix Bastion
+# Terraform Provider for WALLIX Bastion
 
-![Wallix Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX.png)
+![WALLIX Logo](https://raw.githubusercontent.com/wallix/terraform-provider-wallix-bastion/refs/heads/main/assets/LOGO_WALLIX.png)
 
-A Terraform provider for managing Wallix Bastion resources
+A Terraform provider for managing WALLIX Bastion resources
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/wallix/terraform-provider-wallix-bastion)](https://goreportcard.com/report/github.com/wallix/terraform-provider-wallix-bastion)
 [![License](https://img.shields.io/badge/License-MPL%202.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
@@ -10,7 +10,7 @@ A Terraform provider for managing Wallix Bastion resources
 
 ## Overview
 
-The Terraform Wallix Bastion provider allows you to manage Wallix Bastion resources such as users, groups, authorizations, and more through Infrastructure as Code.
+The Terraform WALLIX Bastion provider allows you to manage WALLIX Bastion resources such as users, groups, authorizations, and more through Infrastructure as Code.
 
 ## Requirements
 
@@ -120,7 +120,7 @@ go test -v ./bastion -run TestAccResourceAuthorization_basic
 
 ### Running Acceptance Tests
 
-Acceptance tests require a running Wallix Bastion instance.
+Acceptance tests require a running WALLIX Bastion instance.
 
 ```bash
 # Set environment variables
@@ -304,7 +304,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## Version Compatibility
 
-| Provider Version | Terraform Version | Go Version | Wallix Bastion API |
+| Provider Version | Terraform Version | Go Version | WALLIX Bastion API |
 |------------------|-------------------|------------|-------------------|
 | >= 0.14.0        | >= 1.0           | 1.22-1.24  | v3.12, v3.12      |
 | 0.13.x           | >= 0.14          | 1.19-1.21  | v3.3, v3.6       |
