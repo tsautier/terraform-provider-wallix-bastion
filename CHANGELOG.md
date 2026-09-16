@@ -1,5 +1,11 @@
 # changelog
 
+## 0.15.1 (September 16, 2026)
+
+BUG FIXES:
+
+- **resource/wallix-bastion_application**: fixed `parameters` always being sent to the API, even when left unset, and unconditionally included when `category = "web_application"`, where the API rejects the key outright and rejects the whole request; `parameters` is now omitted from the request unless explicitly set, and setting it with `category = "web_application"` now returns a clear error instead of a rejected API call
+
 ## 0.15.0 (August 24, 2026)
 
 BREAKING CHANGES:

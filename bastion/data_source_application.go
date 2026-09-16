@@ -189,9 +189,7 @@ func fillSourceApplication(d *schema.ResourceData, jsonData jsonApplication) {
 	if tfErr := d.Set(skGlobalDomains, jsonData.GlobalDomains); tfErr != nil {
 		panic(tfErr)
 	}
-	if tfErr := d.Set("parameters", jsonData.Parameters); tfErr != nil {
-		panic(tfErr)
-	}
+	setApplicationOptionalString(d, "parameters", jsonData.Parameters)
 	if tfErr := d.Set("paths", fillApplicationPaths(jsonData.Paths)); tfErr != nil {
 		panic(tfErr)
 	}

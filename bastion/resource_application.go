@@ -23,7 +23,7 @@ type jsonApplication struct {
 	Browser          *string                       `json:"browser,omitempty"`
 	BrowserVersion   *string                       `json:"browser_version,omitempty"`
 	Description      string                        `json:"description"`
-	Parameters       string                        `json:"parameters"`
+	Parameters       *string                       `json:"parameters,omitempty"`
 	Target           *string                       `json:"target,omitempty"`
 	GlobalDomains    *[]string                     `json:"global_domains,omitempty"`
 	Paths            *[]jsonApplicationPath        `json:"paths,omitempty"`
@@ -379,7 +379,10 @@ func prepareApplicationJSON(
 		ApplicationName:  d.Get("application_name").(string),
 		ConnectionPolicy: d.Get(skConnectionPolicy).(string),
 		Description:      d.Get(skDescription).(string),
-		Parameters:       d.Get("parameters").(string),
+	}
+	if v, ok := d.GetOk("parameters"); ok {
+		parameters := v.(string)
+		jsonData.Parameters = &parameters
 	}
 	if v, ok := d.GetOk("tags"); ok {
 		tagsSet := v.(*schema.Set)
@@ -495,6 +498,9 @@ func prepareApplicationJSON(
 		if d.Get("browser_version").(string) != "" {
 			return jsonData, errors.New("browser_version cannot be configured when category = web_application")
 		}
+		if d.Get("parameters").(string) != "" {
+			return jsonData, errors.New("parameters cannot be configured when category = web_application")
+		}
 
 		applicationURL := d.Get("application_url").(string)
 		if applicationURL == "" {
@@ -561,9 +567,7 @@ func fillApplication(d *schema.ResourceData, jsonData jsonApplication) {
 	if tfErr := d.Set(skGlobalDomains, jsonData.GlobalDomains); tfErr != nil {
 		panic(tfErr)
 	}
-	if tfErr := d.Set("parameters", jsonData.Parameters); tfErr != nil {
-		panic(tfErr)
-	}
+	setApplicationOptionalString(d, "parameters", jsonData.Parameters)
 	if tfErr := d.Set("paths", fillApplicationPaths(jsonData.Paths)); tfErr != nil {
 		panic(tfErr)
 	}
