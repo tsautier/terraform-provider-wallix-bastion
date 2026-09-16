@@ -133,7 +133,7 @@ When `category = "web_application"` (API v3.12+), the following fields are requi
 - **application_url**: The URL of the web application
 - **connection_policy**: The connection policy name
 
-Note: The `target`, `paths`, `browser`, and `browser_version` fields cannot be used with web_application.
+Note: The `target`, `paths`, `browser`, `browser_version`, and `parameters` fields cannot be used with web_application.
 
 ### Jumphost Application Configuration (Deprecated)
 
